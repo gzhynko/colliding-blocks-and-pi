@@ -201,7 +201,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "colliding-pi-blocks"
+name = "colliding-blocks-and-pi"
 version = "0.1.0"
 dependencies = [
  "nannou",

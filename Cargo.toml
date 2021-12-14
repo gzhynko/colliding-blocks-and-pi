@@ -1,5 +1,6 @@
 [package]
-name = "colliding-pi-blocks"
+name = "colliding-blocks-and-pi"
+description = "A simple simulation written in Rust inspired by 3Blue1Brown's video on colliding blocks that compute pi."
 version = "0.1.0"
 edition = "2018"
 resolver = "2"

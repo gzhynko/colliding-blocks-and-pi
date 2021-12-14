@@ -18,6 +18,7 @@ struct Model {
     small_block_x: f32,
     small_block_velocity: f32,
     large_block_x: f32,
+    /// the power of 10 for the mass of the large block
     large_block_mass_factor: i64,
     large_block_velocity: f32,
     collision_count: i32,
@@ -28,7 +29,7 @@ fn model(_app: &App) -> Model {
         small_block_x: 0.,
         small_block_velocity: 0.,
         large_block_x: 2. * LARGE_BLOCK_SIZE,
-        large_block_mass_factor: 6,
+        large_block_mass_factor: 4,
         large_block_velocity: -60.,
         collision_count: 0,
     }
@@ -36,7 +37,6 @@ fn model(_app: &App) -> Model {
 
 fn update(_app: &App, model: &mut Model, update: Update) {
     let time_sec = update.since_last.as_secs_f32();
-
     let time_factor = if model.large_block_x - LARGE_BLOCK_SIZE / 2. - WALL_X > SMALL_BLOCK_SIZE { 1 } else { model.large_block_mass_factor };
 
     let large_block_mass = pow(10, model.large_block_mass_factor as usize);
@@ -63,13 +63,13 @@ fn update(_app: &App, model: &mut Model, update: Update) {
             model.collision_count += 1;
         }
 
-        // reverse the small block speed if it collides with the wall
+        // reverse the small block speed when it collides with the wall
         if small_block_left_x <= WALL_X {
             model.small_block_velocity = -model.small_block_velocity;
             model.collision_count += 1;
         }
 
-        // correct positions if one of the blocks clipped into something
+        // correct positions if one of the blocks clips into something
         if small_block_right_x > large_block_left_x {
             let diff = small_block_right_x - large_block_left_x;
             model.small_block_x -= diff;
@@ -97,7 +97,7 @@ fn setup_scene(draw: &Draw, model: &Model, win_rect: &Rect) {
     let mut small_block_x = model.small_block_x;
     let mut large_block_x = model.large_block_x;
 
-    // pause the blocks so that they don't clip into the wall
+    // visually freeze the blocks so that they don't clip into the wall
     if model.large_block_x - LARGE_BLOCK_SIZE / 2. - WALL_X < SMALL_BLOCK_SIZE {
         small_block_x = WALL_X + SMALL_BLOCK_SIZE / 2.;
         large_block_x = WALL_X + SMALL_BLOCK_SIZE + LARGE_BLOCK_SIZE / 2.;
@@ -133,11 +133,27 @@ fn setup_scene(draw: &Draw, model: &Model, win_rect: &Rect) {
         .xy(vec2(large_block_x, FLOOR_Y + LARGE_BLOCK_SIZE / 2.))
         .finish();
 
-    // collision counter
+    // collision counter text
     draw.text(format!("Collisions: {}", model.collision_count).as_str())
         .xy(win_padding.top_right() - vec2(100., 0.))
         .font_size(20)
         .left_justify()
+        .color(BLACK)
+        .finish();
+
+    // small block velocity display text
+    draw.text(format!("{:0.2}", model.small_block_velocity).as_str())
+        .xy(vec2(small_block_x, FLOOR_Y + SMALL_BLOCK_SIZE + 20.))
+        .font_size(20)
+        .center_justify()
+        .color(BLACK)
+        .finish();
+
+    // large block velocity display text
+    draw.text(format!("{:0.2}", model.large_block_velocity).as_str())
+        .xy(vec2(large_block_x, FLOOR_Y + LARGE_BLOCK_SIZE + 20.))
+        .font_size(20)
+        .center_justify()
         .color(BLACK)
         .finish();
 }
