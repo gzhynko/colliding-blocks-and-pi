@@ -16,10 +16,10 @@ fn main() {
 
 struct Model {
     small_block_x: f32,
-    small_block_velocity: f32,
+    small_block_velocity: f64,
     large_block_x: f32,
     /// the power of 10 for the mass of the large block
-    large_block_mass_factor: i64,
+    large_block_mass_factor: i32,
     large_block_velocity: f32,
     collision_count: i32,
 }
@@ -39,23 +39,22 @@ fn update(_app: &App, model: &mut Model, update: Update) {
     let time_sec = update.since_last.as_secs_f32();
     let time_factor = if model.large_block_x - LARGE_BLOCK_SIZE / 2. - WALL_X > SMALL_BLOCK_SIZE { 1 } else { model.large_block_mass_factor };
 
-    let large_block_mass = pow(10, model.large_block_mass_factor as usize);
+    let large_block_mass = i64::pow(10, model.large_block_mass_factor as u32);
 
     // the for loop is here to do the calculations faster by doing them multiple times (the time_factor var) per frame update
     for _i in 0..time_factor {
-        model.small_block_x += model.small_block_velocity * time_sec;
+        model.small_block_x += (model.small_block_velocity * time_sec as f64) as f32;
         model.large_block_x += model.large_block_velocity * time_sec;
 
         let large_block_left_x = model.large_block_x - LARGE_BLOCK_SIZE / 2.;
         let small_block_left_x = model.small_block_x - SMALL_BLOCK_SIZE / 2.;
         let small_block_right_x = model.small_block_x + SMALL_BLOCK_SIZE / 2.;
 
-        let masses_sum = (1 + large_block_mass) as f32;
-
         // check if blocks collide
         if large_block_left_x <= small_block_right_x || small_block_right_x >= large_block_left_x {
-            let small_block_new_vel = ((1. - large_block_mass as f32) / masses_sum * model.small_block_velocity) + ((2. * large_block_mass as f32) / masses_sum * model.large_block_velocity);
-            let large_block_new_vel = ((large_block_mass as f32 - 1.) / masses_sum * model.large_block_velocity) + ((2. * 1.) / masses_sum * model.small_block_velocity);
+            let masses_sum = (1 + large_block_mass) as f64;
+            let small_block_new_vel = ((1. - large_block_mass as f64) / masses_sum * model.small_block_velocity) + ((2. * large_block_mass as f64) / masses_sum * model.large_block_velocity as f64);
+            let large_block_new_vel = ((large_block_mass as f32 - 1.) / masses_sum as f32 * model.large_block_velocity) + ((2. * 1.) / masses_sum as f32 * model.small_block_velocity as f32);
 
             model.small_block_velocity = small_block_new_vel;
             model.large_block_velocity = large_block_new_vel;
